@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zeqnmap-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Монтируем директорию приложения для хранения базы SQLite на хосте
+      - ./backend_data:/app/data
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./data/portfolio.db
+
+  frontend:
+    image: nginx:alpine
+    container_name: zeqnmap-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      # Монтируем твой HTML код и ресурсы
+      - ./frontend:/usr/share/nginx/html:ro
+      # Монтируем конфиг Nginx
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
